@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مولد رموز التفعيل (مع ميزة التجديد)</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #1b2a4a; color: #fff; padding: 40px; }
+        .card { background: #fff; color: #333; padding: 30px; border-radius: 12px; max-width: 500px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        input, button { width: 100%; padding: 12px; margin-top: 10px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
+        button { background: #d4af37; color: #1b2a4a; font-weight: bold; border: none; cursor: pointer; }
+        button:hover { background: #c5a028; }
+        .result { background: #f4f4f4; padding: 15px; border-radius: 8px; word-break: break-all; font-family: monospace; font-size: 18px; color: #1b2a4a; font-weight: bold; text-align: center; user-select: all; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>مولد رموز التفعيل (14 رقماً)</h2>
+    <label>رمز الجهاز (Android ID):</label>
+    <input type="text" id="androidId" placeholder="أدخل Android ID الخاص بالعميل">
+    
+    <label>عدد السنوات:</label>
+    <input type="number" id="years" value="1" min="1" max="10">
+
+    <label>رقم التجديد / التسلسلي (غيره عند كل تجديد للحصول على رمز جديد):</label>
+    <input type="number" id="nonce" value="1" min="0" max="999">
+    
+    <button onclick="generateKey()">توليد رمز التفعيل (14 رقم)</button>
+    
+    <label>رمز التفعيل الناتج (انقر للنسخ):</label>
+    <div class="result" id="keyResult">------------</div>
+</div>
+
+<!-- مكتبة التشفير CryptoJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+    function generateKey() {
+        const androidId = document.getElementById('androidId').value.trim();
+        const years = document.getElementById('years').value.trim();
+        const nonce = document.getElementById('nonce').value.trim();
+        const salt = "NourAlAfrah_Sec";
+
+        if (!androidId || !years || nonce === "") {
+            alert('الرجاء إدخال كافة البيانات');
+            return;
+        }
+
+        const dataToSign = androidId + ":" + years + ":" + nonce + ":" + salt;
+        const hashHex = CryptoJS.HmacSHA256(dataToSign, salt).toString(CryptoJS.enc.Hex);
+        
+        const subHex = hashHex.substring(0, 12);
+        const bigIntVal = BigInt("0x" + subHex);
+        const modVal = bigIntVal % 90000000000000n;
+        const finalVal = modVal + 10000000000000n;
+
+        document.getElementById('keyResult').innerText = finalVal.toString();
+    }
+</script>
+</body>
+</html>
